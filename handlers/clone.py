@@ -37,13 +37,13 @@ async def handle_voice(message: Message):
 
     user_id = message.from_user.id
     
-    # Скачиваем OGG во временный файл
+    # Скачиваем OGG в персистентную папку
     file_info = await message.bot.get_file(message.voice.file_id)
-    os.makedirs("samples", exist_ok=True)
-    ogg_path = f"samples/{user_id}_{int(time.time())}.ogg"
+    os.makedirs("/app/data/samples", exist_ok=True)
+    ogg_path = f"/app/data/samples/{user_id}_{int(time.time())}.ogg"
     await message.bot.download_file(file_info.file_path, ogg_path)
 
-    # Конвертируем в WAV (как в рабочем боте)
+    # Конвертируем в WAV
     try:
         audio = AudioSegment.from_file(ogg_path)
         wav_path = ogg_path.replace(".ogg", ".wav")
