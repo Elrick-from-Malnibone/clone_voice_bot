@@ -9,35 +9,21 @@ logger = logging.getLogger(__name__)
 AUDIO_DIR = "audio"
 os.makedirs(AUDIO_DIR, exist_ok=True)
 
-# Текст, который юзер читает при записи
-CLONE_TEXT = (
-    "Привет! Это мой голос, и я хочу его клонировать. "
-    "Я говорю спокойно, чётко и без спешки, чтобы бот хорошо запомнил тембр. "
-    "Сегодня отличный день, чтобы попробовать что-то новое. "
-    "Я читаю этот текст ровно, с обычной интонацией, как в жизни. "
-    "Мне интересно, как мой голос прозвучит в озвучке. "
-    "Сейчас я сделаю небольшую паузу, чтобы было слышно, как я дышу. "
-    "А потом продолжу говорить дальше, чтобы запись получилась длинной. "
-    "Голос должен звучать естественно, без напряжения и без спешки. "
-    "Я стараюсь произносить каждое слово чётко и понятно. "
-    "Это последнее предложение для клонирования. Спасибо, что слушал."
-)
-
 def clone_voice(audio_path: str) -> str | None:
     url = "https://api.fish.audio/model"
     headers = {"Authorization": f"Bearer {FISH_API_KEY}"}
 
     try:
         with open(audio_path, "rb") as f:
-            files = {"voices": (os.path.basename(audio_path), f, "audio/wav")}
+            files = {
+                "voices": (os.path.basename(audio_path), f, "audio/wav"),
+            }
             data = {
                 "type": "tts",
                 "title": "My Voice",
                 "train_mode": "fast",
                 "visibility": "private",
                 "description": "Cloned from user sample",
-                "texts": CLONE_TEXT,
-                "languages": '["ru"]',  # <--- ПРИНУДИТЕЛЬНО РУССКИЙ ЯЗЫК
             }
             response = requests.post(url, headers=headers, files=files, data=data, timeout=120)
 
@@ -48,11 +34,6 @@ def clone_voice(audio_path: str) -> str | None:
         result = response.json()
         voice_id = result.get("_id") or result.get("id")
         logger.info(f"✅ СОХРАНЕННЫЙ VOICE ID: {voice_id}")
-        
-        # Ждем, пока модель обучится (state: trained)
-        logger.info("⏳ Ждем обучения модели (10 секунд)...")
-        time.sleep(10)
-        
         return voice_id
 
     except Exception as e:
@@ -65,8 +46,7 @@ def generate_speech(text: str, voice_id: str) -> str | None:
     url = "https://api.fish.audio/v1/tts"
     headers = {
         "Authorization": f"Bearer {FISH_API_KEY}",
-        "Content-Type": "application/json",
-        "model": "s2.1-pro",  # <--- МОДЕЛЬ
+        "Content-Type": "application/json"
     }
 
     payload = {
