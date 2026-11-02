@@ -36,7 +36,8 @@ def clone_voice(audio_path: str) -> str | None:
                 "train_mode": "fast",
                 "visibility": "private",
                 "description": "Cloned from user sample",
-                "texts": CLONE_TEXT, # <--- ПЕРЕДАЕМ ТЕКСТ (как советовал Grok)
+                "texts": CLONE_TEXT,
+                "languages": '["ru"]',  # <--- ПРИНУДИТЕЛЬНО РУССКИЙ ЯЗЫК
             }
             response = requests.post(url, headers=headers, files=files, data=data, timeout=120)
 
@@ -65,7 +66,7 @@ def generate_speech(text: str, voice_id: str) -> str | None:
     headers = {
         "Authorization": f"Bearer {FISH_API_KEY}",
         "Content-Type": "application/json",
-        "model": "s2.1-pro", # <--- ПЕРЕДАЕМ МОДЕЛЬ (как советовал Grok)
+        "model": "s2.1-pro",  # <--- МОДЕЛЬ
     }
 
     payload = {
