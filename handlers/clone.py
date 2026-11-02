@@ -1,3 +1,4 @@
+import asyncio
 from io import BytesIO
 
 from aiogram import Router, F
@@ -21,7 +22,6 @@ CLONE_TEXT = (
     "Это последнее предложение для клонирования. Спасибо, что слушал."
 )
 
-
 @router.message(F.text == "🎤 Клонировать голос")
 async def ask_voice(message: Message):
     await message.answer(
@@ -29,7 +29,6 @@ async def ask_voice(message: Message):
         f"«{CLONE_TEXT}»\n\n"
         "Говори чётко, без музыки и шума. Потом отправь голосовое сюда."
     )
-
 
 @router.message(F.voice)
 async def handle_voice(message: Message):
@@ -41,10 +40,11 @@ async def handle_voice(message: Message):
     audio_bytes = buffer.getvalue()
 
     try:
-        voice_id = await clone_voice(
-            audio_bytes=audio_bytes,
-            title=f"user_{message.from_user.id}",
-        )
+        voice_id = await asyncio.to_thread(clone_voice, audio_bytes)
+        
+        if not voice_id:
+            raise Exception("Fish Audio вернул пустой ID")
+            
         set_voice_id(message.from_user.id, voice_id)
         await message.answer("✅ Голос сохранён! Теперь жми «Озвучить текст».")
     except Exception as e:

@@ -1,36 +1,48 @@
-import asyncio
-
-from fishaudio import AsyncFishAudio
-
+import os
+import time
+import requests
 from config import FISH_API_KEY
 
-fish = AsyncFishAudio(api_key=FISH_API_KEY)
+AUDIO_DIR = "audio"
+os.makedirs(AUDIO_DIR, exist_ok=True)
 
+def clone_voice(audio_bytes: bytes) -> str | None:
+    url = "https://api.fish.audio/model"
+    headers = {"Authorization": f"Bearer {FISH_API_KEY}"}
 
-async def clone_voice(audio_bytes: bytes, title: str) -> str:
-    """Создаёт persistent-голос, ждёт обучения, возвращает voice_id."""
-    voice = await fish.voices.create(
-        title=title,
-        voices=[audio_bytes],
-        visibility="private",
-    )
+    files = {"voices": ("voice.wav", audio_bytes, "audio/wav")}
+    data = {
+        "type": "tts",
+        "title": "My Voice",
+        "train_mode": "fast",
+        "visibility": "private",
+    }
+    
+    response = requests.post(url, headers=headers, files=files, data=data, timeout=120)
 
-    deadline = asyncio.get_event_loop().time() + 300
-    while voice.state != "trained":
-        if voice.state == "failed":
-            raise RuntimeError(f"Voice {voice.id} failed to train")
-        if asyncio.get_event_loop().time() > deadline:
-            raise TimeoutError(f"Voice {voice.id} not ready (state={voice.state})")
-        await asyncio.sleep(5)
-        voice = await fish.voices.get(voice.id)
+    if response.status_code not in (200, 201):
+        print(f"Clone error: {response.status_code} — {response.text}")
+        return None
 
-    return voice.id
+    result = response.json()
+    return result.get("_id") or result.get("id")
 
+def generate_speech(text: str, voice_id: str) -> bytes | None:
+    url = "https://api.fish.audio/v1/tts"
+    headers = {
+        "Authorization": f"Bearer {FISH_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "text": text,
+        "format": "mp3",
+        "mp3_bitrate": 128,
+        "reference_id": voice_id,
+    }
 
-async def generate_speech(text: str, voice_id: str) -> bytes:
-    """Генерит mp3 указанным голосом."""
-    return await fish.tts.convert(
-        text=text,
-        reference_id=voice_id,
-        format="mp3",
-    )
+    response = requests.post(url, json=payload, headers=headers, timeout=60)
+    if response.status_code != 200:
+        print(f"TTS error: {response.status_code} — {response.text}")
+        return None
+
+    return response.content
