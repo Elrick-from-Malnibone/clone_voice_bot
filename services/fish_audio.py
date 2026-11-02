@@ -20,6 +20,7 @@ def clone_voice(audio_path: str) -> str | None:
                 "train_mode": "fast",
                 "visibility": "private",
                 "description": "Cloned from user sample",
+                "language": "ru", 
             }
             response = requests.post(url, headers=headers, files=files, data=data, timeout=120)
 
