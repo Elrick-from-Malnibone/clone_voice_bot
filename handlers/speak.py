@@ -15,9 +15,6 @@ async def ask_text(message: Message):
 async def handle_text(message: Message):
     user_id = message.from_user.id
     voice_id = get_voice_id(user_id)
-    
-    # ВЫВОД В ЛОГИ
-    print(f"🔍 ДОСТАЮ ИЗ БАЗЫ: {voice_id}")
 
     if not voice_id:
         await message.answer("Сначала клонируй голос — жми «🎤 Клонировать голос».")
