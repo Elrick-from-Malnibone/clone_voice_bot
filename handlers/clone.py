@@ -1,6 +1,7 @@
 import asyncio
 import os
 import time
+import logging
 from aiogram import Router, F
 from aiogram.types import Message
 from pydub import AudioSegment
@@ -8,6 +9,7 @@ from pydub import AudioSegment
 from database.db import set_voice_id
 from services.fish_audio import clone_voice
 
+logger = logging.getLogger(__name__)
 router = Router()
 
 CLONE_TEXT = (
@@ -37,18 +39,26 @@ async def handle_voice(message: Message):
 
     user_id = message.from_user.id
     
-    # Скачиваем OGG в персистентную папку
+    # Скачиваем OGG в персистентную папку (как в рабочем боте)
     file_info = await message.bot.get_file(message.voice.file_id)
     os.makedirs("/app/data/samples", exist_ok=True)
     ogg_path = f"/app/data/samples/{user_id}_{int(time.time())}.ogg"
     await message.bot.download_file(file_info.file_path, ogg_path)
+    
+    # ЛОГИРУЕМ РАЗМЕР СКАЧАННОГО ФАЙЛА
+    logger.info(f"💾 Голосовое скачано: {ogg_path}, размер на диске: {os.path.getsize(ogg_path)}")
 
     # Конвертируем в WAV
     try:
         audio = AudioSegment.from_file(ogg_path)
         wav_path = ogg_path.replace(".ogg", ".wav")
         audio.export(wav_path, format="wav")
+        
+        # ЛОГИРУЕМ РАЗМЕР ПОСЛЕ КОНВЕРТАЦИИ
+        logger.info(f"✅ Конвертировано в wav: {wav_path}, размер: {os.path.getsize(wav_path)}")
+        
     except Exception as e:
+        logger.error(f"❌ Ошибка конвертации: {e}")
         await message.answer(f"❌ Ошибка конвертации: {e}")
         if os.path.exists(ogg_path): os.remove(ogg_path)
         return
@@ -63,6 +73,7 @@ async def handle_voice(message: Message):
         set_voice_id(user_id, voice_id)
         await message.answer("✅ Голос сохранён! Теперь жми «Озвучить текст».")
     except Exception as e:
+        logger.error(f"❌ Не смог клонировать: {e}")
         await message.answer(f"❌ Не смог клонировать: {e}")
     finally:
         # Чистим файлы
