@@ -1,6 +1,19 @@
 import asyncio
-import subprocess
+import logging
 import os
+import subprocess
+
+# === НАСТРОЙКА ЛОГОВ (как в рабочем боте) ===
+LOG_FILE = "bot.log"
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(LOG_FILE, encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 # === ХАК: УСТАНОВКА FFMPEG ===
 if not os.path.exists("/usr/bin/ffmpeg"):
@@ -21,7 +34,6 @@ from config import BOT_TOKEN
 from database.db import init_db
 from handlers import start, clone, speak
 
-
 async def main():
     init_db()
 
@@ -39,11 +51,11 @@ async def main():
     dp.include_router(clone.router)
     dp.include_router(speak.router)
 
+    logger.info("Бот запущен")
     await dp.start_polling(bot)
-
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("Бот остановлен.")
+        logger.info("Бот остановлен.")
