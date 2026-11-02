@@ -21,10 +21,12 @@ def clone_voice(audio_bytes: bytes) -> str | None:
     response = requests.post(url, headers=headers, files=files, data=data, timeout=120)
 
     if response.status_code not in (200, 201):
-        print(f"Clone error: {response.status_code} — {response.text}")
+        print(f"❌ ОШИБКА КЛОНИРОВАНИЯ: {response.status_code} — {response.text}")
         return None
 
     result = response.json()
+    # ПРОВЕРЯЕМ, ЧТО ОТДАЕТ FISH AUDIO
+    print(f"📦 ОТВЕТ ОТ FISH: {result}")
     return result.get("_id") or result.get("id")
 
 def generate_speech(text: str, voice_id: str) -> bytes | None:
@@ -42,7 +44,7 @@ def generate_speech(text: str, voice_id: str) -> bytes | None:
 
     response = requests.post(url, json=payload, headers=headers, timeout=60)
     if response.status_code != 200:
-        print(f"TTS error: {response.status_code} — {response.text}")
+        print(f"❌ ОШИБКА TTS: {response.status_code} — {response.text}")
         return None
 
     return response.content

@@ -42,6 +42,9 @@ async def handle_voice(message: Message):
     try:
         voice_id = await asyncio.to_thread(clone_voice, audio_bytes)
         
+        # ВЫВОД В ЛОГИ
+        print(f"🔥 СОХРАНЯЮ ID: {voice_id}")
+        
         if not voice_id:
             raise Exception("Fish Audio вернул пустой ID")
             
