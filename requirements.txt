@@ -1,6 +1,11 @@
 aiogram
-fish-audio-sdk==1.3.0
-python-dotenv
+aiohttp
+aiohttp-socks
 requests
+python-dotenv
 pydub
-ffmpeg-python
+numpy
+yookassa
+aiosqlite
+aiogram-sqlite-storage
+fish-audio-sdk==1.3.0
