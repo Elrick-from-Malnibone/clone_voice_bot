@@ -1,4 +1,17 @@
 import asyncio
+import subprocess
+import os
+
+# === ХАК: УСТАНОВКА FFMPEG ===
+if not os.path.exists("/usr/bin/ffmpeg"):
+    print("⏳ FFmpeg не найден. Начинаю установку...")
+    try:
+        subprocess.run(["apt-get", "update"], check=True)
+        subprocess.run(["apt-get", "install", "-y", "ffmpeg"], check=True)
+        print("✅ FFmpeg успешно установлен!")
+    except Exception as e:
+        print(f"❌ Не удалось установить FFmpeg: {e}")
+# ==============================
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
@@ -7,7 +20,6 @@ from aiogram.client.session.aiohttp import AiohttpSession
 from config import BOT_TOKEN
 from database.db import init_db
 from handlers import start, clone, speak
-import os
 
 
 async def main():
