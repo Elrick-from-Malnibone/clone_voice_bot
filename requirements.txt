@@ -1,0 +1,3 @@
+aiogram
+fish-audio-sdk
+python-dotenv
