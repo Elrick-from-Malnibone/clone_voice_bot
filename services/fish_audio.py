@@ -41,7 +41,6 @@ def clone_voice(audio_path: str) -> str | None:
         return None
 
 def generate_speech(text: str, voice_id: str) -> str | None:
-    """Возвращает ПУТЬ к mp3 файлу (как в рабочем боте)."""
     filename = f"{AUDIO_DIR}/voice_{int(time.time() * 1000)}.mp3"
 
     url = "https://api.fish.audio/v1/tts"
@@ -59,7 +58,7 @@ def generate_speech(text: str, voice_id: str) -> str | None:
         "reference_id": voice_id,
     }
 
-    logger.info(f"🗣 ОТПРАВЛЯЮ В TTS: voice_id={voice_id}")
+    logger.info(f"🗣 ОТПРАВЛЯЮ В TTS: {payload}") # <--- ЛОГИРУЕМ ВЕСЬ PAYLOAD
 
     try:
         response = requests.post(url, json=payload, headers=headers, timeout=60)
@@ -67,8 +66,10 @@ def generate_speech(text: str, voice_id: str) -> str | None:
         if response.status_code != 200:
             logger.error(f"❌ Ошибка Fish Audio: {response.status_code} — {response.text}")
             return None
+            
+        # <--- ЛОГИРУЕМ ЗАГОЛОВКИ ОТВЕТА (там видно, какой голос реально применился)
+        logger.info(f"✅ TTS УСПЕХ. Headers: {response.headers}")
 
-        # Сохраняем файл на диск (как в рабочем tts.py)
         with open(filename, "wb") as f:
             f.write(response.content)
 
