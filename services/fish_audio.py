@@ -49,6 +49,7 @@ def generate_speech(text: str, voice_id: str) -> bytes | None:
         "chunk_length": 200,
         "normalize": True,
         "reference_id": voice_id,
+        "model": "s2.1-pro",
     }
 
     logger.info(f"🗣 ОТПРАВЛЯЮ В TTS: voice_id={voice_id}, text={text[:50]}...")
