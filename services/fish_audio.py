@@ -44,9 +44,12 @@ def generate_speech(text: str, voice_id: str) -> str | None:
     filename = f"{AUDIO_DIR}/voice_{int(time.time() * 1000)}.mp3"
 
     url = "https://api.fish.audio/v1/tts"
+    
+    # ДОБАВЛЕНА СТРОКА "model": "s2.1-pro"
     headers = {
         "Authorization": f"Bearer {FISH_API_KEY}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "model": "s2.1-pro"  
     }
 
     payload = {
